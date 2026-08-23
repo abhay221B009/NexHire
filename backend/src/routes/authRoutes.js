@@ -1,8 +1,13 @@
 const express = require("express");
 
-const { signup } = require("../controllers/authController");
+const {
+  signup,
+  login,
+} = require("../controllers/authController");
 
-const { authLimiter } = require("../middleware/rateLimiter");
+const {
+  authLimiter,
+} = require("../middleware/rateLimiter");
 
 const router = express.Router();
 
@@ -15,6 +20,11 @@ router.use(authLimiter);
 //signup route
 
 router.post("/signup", signup);
+
+
+//login route
+
+router.post("/login", login);
 
 
 module.exports = router;
