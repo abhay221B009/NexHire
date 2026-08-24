@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://your-nexhire-backend.onrender.com/api/:path*"
+      "destination": "https://nexhire-backend-b4fs.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
