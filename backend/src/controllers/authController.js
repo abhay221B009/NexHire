@@ -229,7 +229,71 @@ const login = async (req, res) => {
 };
 
 
+//get current authenticated user
+
+const getMe = async (req, res) => {
+  try {
+
+    //authenticate middleware already found the user
+    //and attached it to req.user
+
+    return res.status(200).json({
+      success: true,
+
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+      },
+    });
+
+  } catch (error) {
+
+    console.error("Get current user error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get current user",
+    });
+  }
+};
+
+
+//logout
+
+const logout = async (req, res) => {
+  try {
+
+    //Clear the authentication cookie.
+
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+
+    return res.status(200).json({
+      success: true,
+      message: "Logout successful",
+    });
+
+  } catch (error) {
+
+    console.error("Logout error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to logout",
+    });
+  }
+};
+
+
 module.exports = {
   signup,
   login,
+  getMe,
+  logout,
 };
