@@ -77,5 +77,10 @@ router.get(
   downloadResume
 );
 
+router.get(
+  "/resume/:candidateId",
+  authenticate,
+  downloadResume
+);
 
 module.exports = router;

@@ -1,25 +1,24 @@
 const bcrypt = require("bcryptjs");
-
 const User = require("../models/User");
-
 const { generateToken } = require("../utils/jwt");
 
+// Cookie Configuration helper for local & cross-domain deployment (Vercel + Render)
+const getCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  };
+};
 
-//signup
-
+// signup
 const signup = async (req, res) => {
   try {
+    const { name, email, password, role } = req.body;
 
-    const {
-      name,
-      email,
-      password,
-      role,
-    } = req.body;
-
-
-    //basic validation
-
+    // basic validation
     if (!name || !email || !password || !role) {
       return res.status(400).json({
         success: false,
@@ -27,9 +26,7 @@ const signup = async (req, res) => {
       });
     }
 
-
-    //validate role
-
+    // validate role
     if (!["candidate", "recruiter"].includes(role)) {
       return res.status(400).json({
         success: false,
@@ -37,13 +34,10 @@ const signup = async (req, res) => {
       });
     }
 
-
-    //check duplicate email
-
+    // check duplicate email
     const existingUser = await User.findOne({
       email: email.toLowerCase().trim(),
     });
-
 
     if (existingUser) {
       return res.status(409).json({
@@ -52,14 +46,10 @@ const signup = async (req, res) => {
       });
     }
 
-
-    //Hash password
-
+    // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
 
-
-    //create user
-
+    // create user
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
@@ -67,40 +57,16 @@ const signup = async (req, res) => {
       role,
     });
 
-
-    //generate jwt
-
+    // generate jwt
     const token = generateToken(user);
 
+    // store jwt in http-only cookie
+    res.cookie("token", token, getCookieOptions());
 
-    //store jwt in http-only cookie
-
-    res.cookie("token", token, {
-      httpOnly: true,
-
-      //preventing the browser from sending the cookie
-      //on cross-site requests
-
-      sameSite: "lax",
-
-      //HTTPS should be required in production
-
-      secure: process.env.NODE_ENV === "production",
-
-      //token remains valid for one day
-
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
-
-    //returning safe user data
-
-    //passwordHash is deliberately not returned
-
+    // returning safe user data
     return res.status(201).json({
       success: true,
       message: "Account created successfully",
-
       user: {
         id: user._id,
         name: user.name,
@@ -108,11 +74,8 @@ const signup = async (req, res) => {
         role: user.role,
       },
     });
-
   } catch (error) {
-
     console.error("Signup error:", error.message);
-
     return res.status(500).json({
       success: false,
       message: "Failed to create account",
@@ -120,19 +83,12 @@ const signup = async (req, res) => {
   }
 };
 
-//login
-
+// login
 const login = async (req, res) => {
   try {
+    const { email, password } = req.body;
 
-    const {
-      email,
-      password,
-    } = req.body;
-
-
-    //basic validation
-
+    // basic validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -140,15 +96,10 @@ const login = async (req, res) => {
       });
     }
 
-
-    //find user by email
-
+    // find user by email
     const user = await User.findOne({
       email: email.toLowerCase().trim(),
     });
-
-
-    //check if user exists
 
     if (!user) {
       return res.status(401).json({
@@ -157,16 +108,8 @@ const login = async (req, res) => {
       });
     }
 
-
-    //compare password with stored password hash
-
-    const passwordMatch = await bcrypt.compare(
-      password,
-      user.passwordHash
-    );
-
-
-    //check if password is correct
+    // compare password with stored password hash
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!passwordMatch) {
       return res.status(401).json({
@@ -175,40 +118,15 @@ const login = async (req, res) => {
       });
     }
 
-
-    //generate jwt
-
+    // generate jwt
     const token = generateToken(user);
 
-
-    //store jwt in http-only cookie
-
-    res.cookie("token", token, {
-      httpOnly: true,
-
-      //preventing the browser from sending the cookie
-      //on cross-site requests
-
-      sameSite: "lax",
-
-      //HTTPS should be required in production
-
-      secure: process.env.NODE_ENV === "production",
-
-      //token remains valid for one day
-
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
-
-    //returning safe user data
-
-    //passwordHash is deliberately not returned
+    // store jwt in http-only cookie
+    res.cookie("token", token, getCookieOptions());
 
     return res.status(200).json({
       success: true,
       message: "Login successful",
-
       user: {
         id: user._id,
         name: user.name,
@@ -216,11 +134,8 @@ const login = async (req, res) => {
         role: user.role,
       },
     });
-
   } catch (error) {
-
     console.error("Login error:", error.message);
-
     return res.status(500).json({
       success: false,
       message: "Failed to login",
@@ -228,18 +143,11 @@ const login = async (req, res) => {
   }
 };
 
-
-//get current authenticated user
-
+// get current authenticated user
 const getMe = async (req, res) => {
   try {
-
-    //authenticate middleware already found the user
-    //and attached it to req.user
-
     return res.status(200).json({
       success: true,
-
       user: {
         id: req.user._id,
         name: req.user.name,
@@ -247,11 +155,8 @@ const getMe = async (req, res) => {
         role: req.user.role,
       },
     });
-
   } catch (error) {
-
     console.error("Get current user error:", error.message);
-
     return res.status(500).json({
       success: false,
       message: "Failed to get current user",
@@ -259,37 +164,25 @@ const getMe = async (req, res) => {
   }
 };
 
-
-//logout
-
+// logout
 const logout = async (req, res) => {
   try {
-
-    //Clear the authentication cookie.
-
-    res.clearCookie("token", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
-
+    const options = getCookieOptions();
+    delete options.maxAge;
+    res.clearCookie("token", options);
 
     return res.status(200).json({
       success: true,
       message: "Logout successful",
     });
-
   } catch (error) {
-
     console.error("Logout error:", error.message);
-
     return res.status(500).json({
       success: false,
       message: "Failed to logout",
     });
   }
 };
-
 
 module.exports = {
   signup,

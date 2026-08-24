@@ -620,85 +620,53 @@ const uploadResume = async (req, res) => {
 // ------------------------------------------------------------
 
 const downloadResume = async (req, res) => {
-
   try {
+    let targetUserId = req.user._id;
 
-    const profile =
-      await CandidateProfile.findOne({
-        userId: req.user._id,
-      });
-
-
-    if (
-      !profile ||
-      !profile.resume?.path
-    ) {
-
-      return res.status(404).json({
-
-        success: false,
-
-        message: "Resume not found",
-
-      });
+    // Allow recruiters to view candidate resumes
+    if (req.user.role === "recruiter") {
+      if (req.params.candidateId) {
+        targetUserId = req.params.candidateId;
+      } else if (req.query.candidateId) {
+        targetUserId = req.query.candidateId;
+      }
     }
 
+    const profile = await CandidateProfile.findOne({
+      userId: targetUserId,
+    });
+
+    if (!profile || !profile.resume?.path) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found",
+      });
+    }
 
     // Make sure the file actually exists.
-
-    if (
-      !fs.existsSync(
-        profile.resume.path
-      )
-    ) {
-
+    if (!fs.existsSync(profile.resume.path)) {
       return res.status(404).json({
-
         success: false,
-
-        message:
-          "Resume file not found",
-
+        message: "Resume file not found",
       });
     }
 
-
     // Send the file using the original filename.
-
     return res.download(
-
       profile.resume.path,
-
       profile.resume.originalName,
-
       (error) => {
-
         if (error) {
-
-          console.error(
-            "Resume download error:",
-            error.message
-          );
+          console.error("Resume download error:", error.message);
         }
       }
-
     );
-
   } catch (error) {
-
-    console.error(
-      "Resume download error:",
-      error.message
-    );
-
+    console.error("Resume download error:", error.message);
 
     return res.status(500).json({
-
       success: false,
-
-      message:
-        "Failed to download resume",
-
+      message: "Failed to download resume",
     });
   }
 };
