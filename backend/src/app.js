@@ -8,11 +8,22 @@ const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./routes/authRoutes");
 
+const profileRoutes = require("./routes/profileRoutes");
+
+
 const app = express();
 
 
+// ------------------------------------------------------------
+// SECURITY
+// ------------------------------------------------------------
+
 app.use(helmet());
 
+
+// ------------------------------------------------------------
+// CORS
+// ------------------------------------------------------------
 
 app.use(
   cors({
@@ -22,28 +33,61 @@ app.use(
 );
 
 
+// ------------------------------------------------------------
+// BODY PARSING
+// ------------------------------------------------------------
+
 app.use(express.json());
 
-app.use(express.urlencoded({
-  extended: true,
-}));
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+
+
+// ------------------------------------------------------------
+// COOKIE PARSER
+// ------------------------------------------------------------
 
 app.use(cookieParser());
 
 
-//authentication routes
+// ------------------------------------------------------------
+// AUTHENTICATION ROUTES
+// ------------------------------------------------------------
 
-app.use("/api/auth", authRoutes);
+app.use(
+  "/api/auth",
+  authRoutes
+);
 
 
-app.get("/api/health", (req, res) => {
+// ------------------------------------------------------------
+// PROFILE ROUTES
+// ------------------------------------------------------------
 
-  res.status(200).json({
-    success: true,
-    message: "NexHire API is runnig",
-  });
+app.use(
+  "/api/profile",
+  profileRoutes
+);
 
-});
+
+// ------------------------------------------------------------
+// HEALTH CHECK
+// ------------------------------------------------------------
+
+app.get(
+  "/api/health",
+  (req, res) => {
+
+    res.status(200).json({
+      success: true,
+      message: "NexHire API is runnig",
+    });
+
+  }
+);
 
 
 module.exports = {
