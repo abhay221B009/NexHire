@@ -30,6 +30,8 @@ const applicationSchema = new mongoose.Schema(
         "Interview",
         "Offer",
         "Rejected",
+        "Shortlisted",
+        "Hired",
       ],
       default:"Applied",
       required:true,

@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 // Represents a job posted by a recruiter.
 //
 // A job contains information such as:
+// - recruiter
 // - title
 // - company
 // - location
@@ -20,7 +21,22 @@ const mongoose = require("mongoose");
 
 const jobSchema = new mongoose.Schema(
   {
-    // Job title
+    // --------------------------------------------------------
+    // RECRUITER WHO CREATED THE JOB
+    // --------------------------------------------------------
+
+    recruiterId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+
+
+    // --------------------------------------------------------
+    // JOB TITLE
+    // --------------------------------------------------------
+
     title: {
       type: String,
       required: [true, "Job title is required"],
@@ -29,7 +45,10 @@ const jobSchema = new mongoose.Schema(
     },
 
 
-    // Company offering the position
+    // --------------------------------------------------------
+    // COMPANY
+    // --------------------------------------------------------
+
     company: {
       type: String,
       required: [true, "Company name is required"],
@@ -38,7 +57,10 @@ const jobSchema = new mongoose.Schema(
     },
 
 
-    // Job location
+    // --------------------------------------------------------
+    // LOCATION
+    // --------------------------------------------------------
+
     location: {
       type: String,
       required: [true, "Location is required"],
@@ -47,7 +69,10 @@ const jobSchema = new mongoose.Schema(
     },
 
 
-    // Skills required for the job
+    // --------------------------------------------------------
+    // REQUIRED SKILLS
+    // --------------------------------------------------------
+
     skills: {
       type: [String],
       default: [],
@@ -55,7 +80,10 @@ const jobSchema = new mongoose.Schema(
     },
 
 
-    // Description of the position
+    // --------------------------------------------------------
+    // JOB DESCRIPTION
+    // --------------------------------------------------------
+
     description: {
       type: String,
       required: [true, "Job description is required"],
@@ -63,7 +91,10 @@ const jobSchema = new mongoose.Schema(
     },
 
 
-    // Required experience level
+    // --------------------------------------------------------
+    // EXPERIENCE LEVEL
+    // --------------------------------------------------------
+
     experienceLevel: {
       type: String,
       required: true,
@@ -71,7 +102,10 @@ const jobSchema = new mongoose.Schema(
     },
 
 
-    // Work arrangement
+    // --------------------------------------------------------
+    // WORK MODE
+    // --------------------------------------------------------
+
     workMode: {
       type: String,
       enum: ["Office", "Hybrid", "Remote"],
@@ -79,8 +113,10 @@ const jobSchema = new mongoose.Schema(
     },
 
 
-    // Allows recruiters to disable a job
-    // without deleting it.
+    // --------------------------------------------------------
+    // ACTIVE / INACTIVE
+    // --------------------------------------------------------
+
     isActive: {
       type: Boolean,
       default: true,
@@ -89,10 +125,6 @@ const jobSchema = new mongoose.Schema(
   },
 
   {
-    // Automatically creates:
-    //
-    // createdAt
-    // updatedAt
     timestamps: true,
   }
 );
@@ -100,13 +132,6 @@ const jobSchema = new mongoose.Schema(
 
 // ------------------------------------------------------------
 // INDEX
-// ------------------------------------------------------------
-//
-// Makes active-job listings sorted by newest first
-// more efficient.
-//
-// 1  = ascending
-// -1 = descending
 // ------------------------------------------------------------
 
 jobSchema.index({
@@ -122,5 +147,4 @@ jobSchema.index({
 const Job = mongoose.model("Job", jobSchema);
 
 
-// Export the Mongoose model.
 module.exports = Job;

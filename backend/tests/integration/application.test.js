@@ -117,6 +117,7 @@ afterEach(async () => {
 
       // Create a test job.
       job = await Job.create({
+        recruiterId: new mongoose.Types.ObjectId(),
         title: "Frontend Developer",
         company: "NexTech",
         location: "Noida",

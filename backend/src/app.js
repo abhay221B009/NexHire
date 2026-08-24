@@ -10,6 +10,10 @@ const authRoutes = require("./routes/authRoutes");
 
 const profileRoutes = require("./routes/profileRoutes");
 
+const jobRoutes = require("./routes/jobRoutes");
+
+const applicationRoutes = require("./routes/applicationRoutes");
+
 
 const app = express();
 
@@ -72,6 +76,18 @@ app.use(
   profileRoutes
 );
 
+// ------------------------------------------------------------
+// JOB ROUTES
+// ------------------------------------------------------------
+app.use("/api/jobs", jobRoutes);
+
+
+// ------------------------------------------------------------
+// APPLICATION ROUTES
+// ------------------------------------------------------------
+app.use("/api/applications", applicationRoutes);
+
+
 
 // ------------------------------------------------------------
 // HEALTH CHECK
@@ -83,7 +99,7 @@ app.get(
 
     res.status(200).json({
       success: true,
-      message: "NexHire API is runnig",
+      message: "NexHire API is running",
     });
 
   }
