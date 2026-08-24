@@ -21,10 +21,16 @@ const mongoose = require("mongoose");
 
 const connectDatabase = async () => {
   try {
+    const uri = process.env.MONGODB_URI || (process.env.NODE_ENV !== "production" ? "mongodb://127.0.0.1:27017/nexhire" : null);
+
+    if (!uri) {
+      throw new Error(
+        "MONGODB_URI environment variable is missing! Please set MONGODB_URI in your Render Environment Variables dashboard."
+      );
+    }
 
     // Connect to MongoDB using the connection string
-    // stored in the environment variables.
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(uri);
 
     // This confirms that the database connection succeeded.
     console.log("MongoDB connected successfully");
