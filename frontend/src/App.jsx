@@ -12,7 +12,9 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 
-// Protected Route Guard
+// Protected Route Guard (Higher-Order Component Pattern):
+// Wraps sensitive pages (/dashboard). Waits for session loading flag check,
+// redirects unauthenticated users to /login using <Navigate replace />, and enforces role authorization if allowedRole is specified.
 function ProtectedRoute({ children, allowedRole }) {
   const { isAuthenticated, loading, user } = useAuth();
 
@@ -25,6 +27,7 @@ function ProtectedRoute({ children, allowedRole }) {
     );
   }
 
+  // Declarative Redirect: Navigates unauthenticated client to /login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }

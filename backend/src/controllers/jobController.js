@@ -215,6 +215,9 @@ const getJobs = async (req, res) => {
   try {
     await seedDefaultJobsIfEmpty();
 
+    // .find({ isActive: true }): Soft-deletion query filter returning only active openings.
+    // .sort({ createdAt: -1 }): Orders records descending by creation date (newest first).
+    // .lean(): Returns lightweight plain JS objects instead of Mongoose Hydrated Documents (~5x faster query performance).
     let jobs = await Job.find({ isActive: true }).sort({ createdAt: -1 }).lean();
 
     if (!jobs || jobs.length === 0) {
@@ -358,6 +361,8 @@ const deleteJob = async (req, res) => {
       });
     }
 
+    // Soft Deletion Pattern: Marks isActive as false instead of destroying database row with deleteOne().
+    // Preserves historical candidate application records and recruitment metrics while hiding job from active browsing catalog.
     job.isActive = false;
     await job.save();
 

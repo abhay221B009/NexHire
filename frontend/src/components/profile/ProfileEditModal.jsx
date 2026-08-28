@@ -16,6 +16,8 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onProfileUp
   const [skills, setSkills] = useState([]);
   const [skillInput, setSkillInput] = useState('');
 
+  // Controlled Form Inputs Initialization:
+  // Populates local state from incoming profile prop whenever profile changes.
   useEffect(() => {
     if (profile) {
       setPhone(profile.phone || '');
@@ -27,6 +29,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onProfileUp
     }
   }, [profile]);
 
+  // Immutable State Update: Appends new skill tag without mutating existing array state
   const handleAddSkill = () => {
     const trimmed = skillInput.trim();
     if (trimmed && !skills.includes(trimmed)) {
@@ -35,10 +38,13 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onProfileUp
     }
   };
 
+  // Immutable Filter Update: Removes skill tag using Array.prototype.filter
   const handleRemoveSkill = (skillToRemove) => {
     setSkills(skills.filter((s) => s !== skillToRemove));
   };
 
+  // Profile Save Submission Handler:
+  // Dynamically switches between HTTP POST (initial creation) and HTTP PUT (update existing)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

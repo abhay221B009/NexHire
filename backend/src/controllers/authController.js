@@ -3,13 +3,16 @@ const User = require("../models/User");
 const { generateToken } = require("../utils/jwt");
 
 // Cookie Configuration helper for local & cross-domain deployment (Vercel + Render)
+// - httpOnly: Prevents client-side JS (document.cookie) access to mitigate XSS token theft.
+// - sameSite: Set to 'none' in prod for cross-site cookie sending between Vercel & Render, 'lax' in dev.
+// - secure: Transmits cookie exclusively over encrypted HTTPS in production.
 const getCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === "production";
   return {
     httpOnly: true,
     sameSite: isProduction ? "none" : "lax",
     secure: isProduction,
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    maxAge: 24 * 60 * 60 * 1000, // 1 day session duration
   };
 };
 
@@ -46,7 +49,7 @@ const signup = async (req, res) => {
       });
     }
 
-    // Hash password
+    // bcrypt.hash(password, 12): Uses 12 salt rounds of key stretching to compute salted password hash, defeating rainbow table attacks.
     const passwordHash = await bcrypt.hash(password, 12);
 
     // create user
@@ -57,10 +60,10 @@ const signup = async (req, res) => {
       role,
     });
 
-    // generate jwt
+    // generate jwt token containing userId and role claims
     const token = generateToken(user);
 
-    // store jwt in http-only cookie
+    // res.cookie(): Sets token in HTTP-Only response header
     res.cookie("token", token, getCookieOptions());
 
     // returning safe user data

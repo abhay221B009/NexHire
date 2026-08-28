@@ -39,6 +39,8 @@ export default function Dashboard({ isPostJobOpen, onClosePostJob }) {
   const [loadingMyJobs, setLoadingMyJobs] = useState(false);
   const [selectedJobForApps, setSelectedJobForApps] = useState(null);
 
+  // Polymorphic Role-Based Data Fetching:
+  // Dynamically fetches candidate profiles/applications OR recruiter job listings based on isCandidate / isRecruiter flags.
   useEffect(() => {
     if (isCandidate) {
       fetchProfile();

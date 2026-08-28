@@ -2,7 +2,7 @@
 const User = require("../models/User");
 
 
-// Import our JWT verification helper.
+ 
 const { verifyToken } = require("../utils/jwt");
 
 
@@ -13,9 +13,7 @@ const { verifyToken } = require("../utils/jwt");
 const authenticate = async (req, res, next) => {
   try {
 
-    // Read the JWT from the HTTP-only cookie.
-    //
-    // cookie-parser makes req.cookies available.
+    // Read JWT from HTTP-Only cookie parsed by cookie-parser middleware.
     const token = req.cookies?.token;
 
 
@@ -28,13 +26,11 @@ const authenticate = async (req, res, next) => {
     }
 
 
-    // Verify the token.
-   
+    // verifyToken(): Decodes JWT and verifies signature against JWT_SECRET.
     const decoded = verifyToken(token);
 
 
-    // Find the user referenced by the JWT.
-     
+    // .select("-passwordHash"): Mongoose field exclusion preventing sensitive password hash bytes from attaching to req.user.
     const user = await User.findById(decoded.userId)
       .select("-passwordHash");
 

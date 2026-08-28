@@ -37,6 +37,8 @@ export default function ApplicantCard({ application, onStatusUpdated }) {
 
   const candidateId = candidate._id || candidate;
 
+  // Recruitment Pipeline State Machine Transition:
+  // Dispatches HTTP PATCH request to update the candidate's application stage across 7 valid lifecycle stages.
   const handleStageChange = async (newStage) => {
     if (newStage === currentStage) return;
 

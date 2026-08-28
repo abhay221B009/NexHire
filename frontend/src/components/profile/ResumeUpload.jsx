@@ -16,6 +16,8 @@ export default function ResumeUpload({ resume, onResumeUploaded }) {
     }
   };
 
+  // HTML5 Drag & Drop File Event Handlers:
+  // Intercepts browser default drag behavior (e.preventDefault()) and reads dropped files from e.dataTransfer.files
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -35,6 +37,10 @@ export default function ResumeUpload({ resume, onResumeUploaded }) {
     }
   };
 
+  // Resume File Upload Handler:
+  // 1. Client-Side Size Guard: Checks file.size against 5MB limit before making network request.
+  // 2. FormData Construction: Wraps binary file buffer inside standard multipart/form-data payload.
+  // 3. API Dispatch: Sends POST request to /api/profile/resume for server-side magic-byte inspection.
   const uploadFile = async (file) => {
     if (file.size > 5 * 1024 * 1024) {
       showError('File size exceeds 5MB limit.');

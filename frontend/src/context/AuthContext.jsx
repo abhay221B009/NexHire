@@ -1,13 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/axios';
 
+// React Context API:
+// Centralizes user authentication state across the component tree without prop-drilling.
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check auth status on app initialization
+  // On-Boot Session Check:
+  // Calls GET /api/auth/me on app load. Axios transmits the HTTP-Only cookie automatically.
+  // If valid, populates global user state; if invalid/expired, resets user state to null.
   const checkAuth = async () => {
     try {
       const response = await api.get('/auth/me');
@@ -23,6 +27,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // useEffect with empty dependency array []: Executes checkAuth() once after initial mount.
   useEffect(() => {
     checkAuth();
   }, []);
@@ -62,6 +67,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
+    // Context Provider Value Object:
+    // Exposes auth state, status loading flag, derived role booleans (isCandidate, isRecruiter), and auth dispatch actions.
     <AuthContext.Provider
       value={{
         user,
@@ -80,6 +87,8 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// Custom React Hook (useAuth):
+// Encapsulates useContext(AuthContext) and enforces component instantiation within an AuthProvider wrapper.
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

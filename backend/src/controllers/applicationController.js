@@ -38,6 +38,7 @@ const applyForJob = async (req, res) => {
     }
 
     // Check if application already exists
+    // .findOne(): Queries MongoDB for a single document matching candidateId and jobId.
     const existingApplication = await Application.findOne({
       candidateId: req.user._id,
       jobId: jobId,
@@ -50,6 +51,7 @@ const applyForJob = async (req, res) => {
       });
     }
 
+    // .create(): Instantiates and persists a new Application document in MongoDB.
     const application = await Application.create({
       candidateId: req.user._id,
       jobId: jobId,
@@ -63,6 +65,8 @@ const applyForJob = async (req, res) => {
     });
 
   } catch (error) {
+    // error.code === 11000: MongoDB native Duplicate Key Error code.
+    // Triggered if a concurrent request violates the compound unique index { candidateId: 1, jobId: 1 }.
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
@@ -96,6 +100,9 @@ const getMyApplications = async (req, res) => {
       });
     }
 
+    // .populate(): Foreign key join replacing ObjectId references with selected fields from Job model.
+    // .sort({ createdAt: -1 }): Orders records descending by creation timestamp (newest applications first).
+    // .lean(): Bypasses Mongoose document hydration to return plain JS objects for ~5x faster execution and lower memory usage.
     const applications = await Application.find({
       candidateId: req.user._id,
     })
@@ -146,6 +153,7 @@ const getJobApplications = async (req, res) => {
       });
     }
 
+    // Resource Ownership Check: Ensures recruiter can only view applicants for jobs they created.
     if (job.recruiterId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -153,6 +161,9 @@ const getJobApplications = async (req, res) => {
       });
     }
 
+    // .populate(): Fetches candidate User details (name, email, role) linked by candidateId.
+    // .sort({ createdAt: -1 }): Orders applicants by latest submission timestamp.
+    // .lean(): Converts Mongoose documents into plain JS objects so custom properties (candidateProfile) can be attached dynamically.
     const applications = await Application.find({ jobId })
       .populate("candidateId", "name email role")
       .sort({ createdAt: -1 })
@@ -161,6 +172,7 @@ const getJobApplications = async (req, res) => {
     // Attach candidate profile data if available
     for (let app of applications) {
       if (app.candidateId?._id) {
+        // .lean(): Returns plain object for fast property attachment without Mongoose schema restrictions.
         const profile = await CandidateProfile.findOne({
           userId: app.candidateId._id,
         }).lean();
